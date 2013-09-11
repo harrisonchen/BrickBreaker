@@ -1,3 +1,8 @@
+#ifndef _ARDUINO_H_
+#define _ARDUINO_H_
+#include "Arduino.h"
+#endif /*_ARDUINO_H_*/
+
 #ifndef _BALL_H_
 #define _BALL_H_
 

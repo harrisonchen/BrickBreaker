@@ -1,3 +1,8 @@
+#ifndef _ARDUINO_H_
+#define _ARDUINO_H_
+#include "Arduino.h"
+#endif /*_ARDUINO_H_*/
+
 #ifndef _PADDLE_H_
 #define _PADDLE_H_
 
