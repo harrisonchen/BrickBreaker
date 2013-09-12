@@ -26,8 +26,8 @@ public:
 private:
 	int row;
 	int col;
-	string rowDir;
-	string colDir;
+	int rowDir; //1 UP, 2 DOWN
+	int colDir; //1 LEFT, 2 RIGHT
 };
 
 #endif /*_BALL_H_*/
