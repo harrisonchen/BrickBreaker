@@ -2,36 +2,41 @@
 
 Paddle::Paddle():row(0x80)//, col[1](0x02), col[2](0x04), col[3](0x08)
 {
-	col[1] = 0x02;
-	col[2] = 0x04;
-	col[3] = 0x08;
+	col[0] = 0x02;
+	col[1] = 0x04;
+	col[2] = 0x08;
 }
 
 Paddle::Paddle(int r, int c1, int c2, int c3):row(r)//, col[1](c1), col[2](c2), col[3](c3)
 {
-	col[1] = c1;
-	col[2] = c2;
-	col[3] = c3;
+	col[0] = c1;
+	col[1] = c2;
+	col[2] = c3;
+}
+
+int Paddle::getPaddleRow()
+{
+	return row;
 }
 
 int Paddle::getLeftPaddle()
 {
-	return col[1];
+	return col[0];
 }
 
 int Paddle::getMidPaddle()
 {
-	return col[2];
+	return col[1];
 }
 
 int Paddle::getRightPaddle()
 {
-	return col[3];
+	return col[2];
 }
 
 void Paddle::shiftPaddleLeft()
 {
-	if(col[1] != 0x01)
+	if(col[0] != 0x01)
 	{
 		for(int i = 0; i < 3; ++i)
 		{
@@ -42,7 +47,7 @@ void Paddle::shiftPaddleLeft()
 
 void Paddle::shiftPaddleRight()
 {
-	if(col[3] != 0x80)
+	if(col[2] != 0x80)
 	{
 		for(int i = 0; i < 3; ++i)
 		{

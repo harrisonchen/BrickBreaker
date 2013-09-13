@@ -6,23 +6,23 @@
 #ifndef _BLOCK_H_
 #define _BLOCK_H_
 
+#include <list>
+
+using namespace std;
+
 class Block
 {
 public:
 	Block();
 
 	int isBlockThere(int, int);
-	int findBlockIndex(int, int);
 	
 	void setBlock(int, int);
 	void removeBlock(int, int);
 
 private:
-	const int maxSize = 32;
-	int blockRow[maxSize];
-	int blockCol[maxSize];
-	int currentSize = 0;
-
+	list<int> blockRow;
+	list<int> blockCol;
 };
 
 #endif /*_BLOCK_H_*/

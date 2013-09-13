@@ -22,6 +22,7 @@ public:
 	void shiftRowDown();
 	void shiftColLeft();
 	void shiftColRight();
+	int hitPaddle(int, int, int, int);
 
 private:
 	int row;

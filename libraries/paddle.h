@@ -16,6 +16,7 @@ public:
 	Paddle();
 	Paddle(int, int, int, int);
 
+	int getPaddleRow();
 	int getLeftPaddle();
 	int getMidPaddle();
 	int getRightPaddle();
