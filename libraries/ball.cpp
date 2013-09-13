@@ -37,3 +37,15 @@ void Ball::shiftColRight()
 {
 	col = col << 1;
 }
+
+int Ball::hitPaddle(int paddleRow, int paddleLeft, int paddleMid, int paddleRight)
+{
+	if( (paddleRow == row) && ((paddleLeft == col) || (paddleMid == col) || (paddleRight == col)) )
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}

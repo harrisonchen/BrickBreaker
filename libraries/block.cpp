@@ -1,48 +1,34 @@
 #include "block.h"
 
-Block::Block(): currentSize(0)
+Block::Block()
 {
 }
 
 int Block::isBlockThere(int row, int col)
 {
 	int exist = 0;
-	for(int i = 0; i < currentSize; ++i)
+	list<int>::iterator itRow = blockRow.begin();
+	list<int>::iterator itCol = blockCol.begin();
+
+	for(; (itRow != blockRow.end()) && (itCol != blockCol.end()); ++itRow, ++itCol)
 	{
-		if(blockRow[i] == row && blockCol[i] == col)
+		if( (*itRow == row) && (*itCol == col) )
 		{
-			index = 1;
+			exist = 1;
 			break;
 		}
 	}
 	return exist;
 }
 
-int Block::findBlockIndex(int row, int col)
-{
-	int index = 0;
-	for(int i = 0; i < currentSize; ++i)
-	{
-		if(blockRow[i] == row && blockCol[i] == col)
-		{
-			index = i;
-			break;
-		}
-	}
-	return index;
-}
-
 void Block::setBlock(int row, int col)
 {
-	blockRow[currentSize] = row;
-	blockCol[currentSize] = col;
-	++currentSize;
+	blockRow.push_back(row);
+	blockCol.push_back(col);
 }
 
 void Block::removeBlock(int row, int col)
 {
-	int index = findBLockIndex(row, col);
-	blockRow[index] = 0;
-	blockCol[index] = 0;
-	--currentSize;
+	blockRow.remove(row);
+	blockCol.remove(col);
 }
