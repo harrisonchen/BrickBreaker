@@ -1,3 +1,9 @@
+#include <ball.h>
+#include <paddle.h>
+
+Ball ball;
+Paddle paddle;
+
 #include <I2Cdev.h>
 #include <MPU6050.h>
 
@@ -59,7 +65,203 @@ void shiftVal(int redByte, int greenByte, int blueByte, int colByte)
   digitalWrite(latchPin, HIGH);
 }
 
-void loop()
+enum ballStates{ballInit, ballUpLeft, ballUpRight, ballDownLeft, ballDownRight} ballState;
+
+void ballController()
+{
+  switch(ballState)
+  {
+    case ballInit:
+    {
+      ballState = ballUpRight;
+      break;
+    }
+    case ballUpLeft:
+    {
+      if( (ball.getRow() == 0x01) && (ball.getCol() == 0x01) )
+      {
+        ballState = ballDownRight;
+      }
+      else if(ball.getRow() == 0x01)
+      {
+        ballState = ballDownLeft;
+      }
+      else if(ball.getCol() == 0x01)
+      {
+        ballState = ballUpRight;
+      }
+      break;
+    }
+    case ballUpRight:
+    {
+      if( (ball.getRow() == 0x01) && (ball.getCol() == 0x80) )
+      {
+        ballState = ballDownLeft;
+      }
+      else if(ball.getRow() == 0x01)
+      {
+        ballState = ballDownRight;
+      }
+      else if(ball.getCol() == 0x80)
+      {
+        ballState = ballUpLeft;
+      }
+      break;
+    }
+    case ballDownLeft:
+    {
+      if( (ball.getRow() == 0x80) && (ball.getCol() == 0x01) )
+      {
+        ballState = ballUpRight;
+      }
+      else if(ball.getRow() == 0x80)
+      {
+        ballState = ballUpLeft;
+      }
+      else if(ball.getCol() == 0x01)
+      {
+        ballState = ballDownRight;
+      }
+      break;
+    }
+    case ballDownRight:
+    {
+      if( (ball.getRow() == 0x80) && (ball.getCol() == 0x80) )
+      {
+        ballState = ballUpLeft;
+      }
+      else if(ball.getRow() == 0x80)
+      {
+        ballState = ballUpRight;
+      }
+      else if(ball.getCol() == 0x80)
+      {
+        ballState = ballDownLeft;
+      }
+      break;
+    }
+    default:
+    {
+      ballState = ballInit;
+      break;
+    }
+  }
+  
+  switch(ballState)
+  {
+    case ballInit:
+    {
+      break;
+    }
+    case ballUpLeft:
+    {
+      ball.shiftRowUp();
+      ball.shiftColLeft();
+      break;
+    }
+    case ballUpRight:
+    {
+      ball.shiftRowUp();
+      ball.shiftColRight();
+      break;
+    }
+    case ballDownLeft:
+    {
+      ball.shiftRowDown();
+      ball.shiftColLeft();
+      break;
+    }
+    case ballDownRight:
+    {
+      ball.shiftRowDown();
+      ball.shiftColRight();
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+enum paddleStates{paddleInit, paddleStay, paddleLeft, paddleRight} paddleState;
+
+void paddleController()
+{
+  switch(paddleState)
+  {
+    case paddleInit:
+    {
+      paddleState = paddleLeft;
+      break;
+    }
+    case paddleStay:
+    {
+      break;
+    }
+    case paddleLeft:
+    {
+      if(paddle.getLeftPaddle() == 0x01)
+      {
+        paddleState = paddleRight;
+      }
+      break;
+    }
+    case paddleRight:
+    {
+      if(paddle.getRightPaddle() == 0x80)
+      {
+        paddleState = paddleLeft;
+      }
+      break;
+    }
+    default:
+    {
+      paddleState = paddleInit;
+      break;
+    }
+  }
+  
+  switch(paddleState)
+  {
+    case paddleInit:
+    {
+      break;
+    }
+    case paddleStay:
+    {
+      break;
+    }
+    case paddleLeft:
+    {
+      paddle.shiftPaddleLeft();
+      break;
+    }
+    case paddleRight:
+    {
+      paddle.shiftPaddleRight();
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+void gameController()
 {
   
+}
+
+void loop()
+{
+  ballController();
+  paddleController();
+  
+  shiftVal(0, paddle.getPaddleRow(), 0, paddle.getLeftPaddle());
+  shiftVal(0, paddle.getPaddleRow(), 0, paddle.getMidPaddle());
+  shiftVal(0, paddle.getPaddleRow(), 0, paddle.getRightPaddle());
+  shiftVal(0, 0, ball.getRow(), ball.getCol());
+  delay(200);
 }
