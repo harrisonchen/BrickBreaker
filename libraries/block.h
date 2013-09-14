@@ -6,7 +6,7 @@
 #ifndef _BLOCK_H_
 #define _BLOCK_H_
 
-#include <list>
+#include "singlyList.h"
 
 using namespace std;
 
@@ -21,8 +21,8 @@ public:
 	void removeBlock(int, int);
 
 private:
-	list<int> blockRow;
-	list<int> blockCol;
+	SinglyList blockRow;
+	SinglyList blockCol;
 };
 
 #endif /*_BLOCK_H_*/
