@@ -12,6 +12,9 @@ int ballTimer = 0;
 int paddleTimer = 0;
 int blockTimer = 0;
 int outputTimer = 0;
+int changeDir = 0;
+int blockRow1 = 0x04;
+int blockRow2 = 0x08;
 
 #include <I2Cdev.h>
 #include <MPU6050.h>
@@ -76,18 +79,14 @@ void shiftVal(int redByte, int greenByte, int blueByte, int colByte)
 
 void blockSetup()
 {
-  blocks.setBlock(0x02, 0x02);
-  blocks.setBlock(0x02, 0x04);
-  blocks.setBlock(0x02, 0x08);
-  blocks.setBlock(0x02, 0x10);
-  blocks.setBlock(0x02, 0x20);
-  blocks.setBlock(0x02, 0x40);
-  blocks.setBlock(0x04, 0x02);
-  blocks.setBlock(0x04, 0x04);
-  blocks.setBlock(0x04, 0x08);
-  blocks.setBlock(0x04, 0x10);
-  blocks.setBlock(0x04, 0x20);
-  blocks.setBlock(0x04, 0x40);
+  blocks.setBlock(blockRow1, 0x04);
+  blocks.setBlock(blockRow1, 0x08);
+  blocks.setBlock(blockRow1, 0x10);
+  blocks.setBlock(blockRow1, 0x20);
+  blocks.setBlock(blockRow2, 0x04);
+  blocks.setBlock(blockRow2, 0x08);
+  blocks.setBlock(blockRow2, 0x10);
+  blocks.setBlock(blockRow2, 0x20);
 }
 
 void rowRegClear()
@@ -108,13 +107,13 @@ void rowRegInit()
     {
       blueRowRegister[i] += ball.getRow();
     }
-    if(blocks.isBlockThere(0x02, colRegister[i]))
+    if(blocks.isBlockThere(blockRow1, colRegister[i]))
     {
-      greenRowRegister[i] += 0x02;
+      greenRowRegister[i] += blockRow1;
     }
-    if(blocks.isBlockThere(0x04, colRegister[i]))
+    if(blocks.isBlockThere(blockRow2, colRegister[i]))
     {
-      greenRowRegister[i] += 0x04;
+      greenRowRegister[i] += blockRow2;
     }
     if(paddle.getLeftPaddle() == colRegister[i])
     {
@@ -156,7 +155,17 @@ void ballController()
     }
     case ballUpLeft:
     {
-      if( (ball.getRow() == 0x01) && (ball.getCol() == 0x01) )
+      if(changeDir == 1)
+      {
+        ballState = ballDownLeft;
+        changeDir = 0;
+      }
+      else if(changeDir == 2)
+      {
+        ballState = ballDownRight;
+        changeDir = 0;
+      }
+      else if( (ball.getRow() == 0x01) && (ball.getCol() == 0x01) )
       {
         ballState = ballDownRight;
       }
@@ -172,7 +181,17 @@ void ballController()
     }
     case ballUpRight:
     {
-      if( (ball.getRow() == 0x01) && (ball.getCol() == 0x80) )
+      if(changeDir == 1)
+      {
+        ballState = ballDownRight;
+        changeDir = 0;
+      }
+      else if(changeDir == 2)
+      {
+        ballState = ballDownLeft;
+        changeDir = 0;
+      }
+      else if( (ball.getRow() == 0x01) && (ball.getCol() == 0x80) )
       {
         ballState = ballDownLeft;
       }
@@ -188,8 +207,19 @@ void ballController()
     }
     case ballDownLeft:
     {
+      //Block hhit
+      if(changeDir == 1)
+      {
+        ballState = ballUpLeft;
+        changeDir = 0;
+      }
+      else if(changeDir == 2)
+      {
+        ballState = ballUpRight;
+        changeDir = 0;
+      }
       //Corner hit
-      if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
+      else if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle())) &&
                           (ball.getCol() == 0x01) )
                           {
@@ -222,8 +252,18 @@ void ballController()
     }
     case ballDownRight:
     {
+      if(changeDir == 1)
+      {
+        ballState = ballUpRight;
+        changeDir = 0;
+      }
+      else if(changeDir == 2)
+      {
+        ballState = ballUpLeft;
+        changeDir = 0;
+      }
       //Corner hit
-      if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
+      else if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle())) &&
                           (ball.getCol() == 0x80) )
                           {
@@ -407,9 +447,88 @@ void blockController()
     }
     case blockMissed:
     {
-      if( blocks.isBlockThere(ball.getRow(), ball.getCol()) )
+      switch(ballState)
       {
-        blockState = blockHit;
+        case ballUpLeft:
+        {
+          if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()))
+          {
+            blocks.removeBlock((ball.getRow() >> 1), ball.getCol());
+            changeDir = 1;
+            blockState = blockHit;
+          }
+          else if( blocks.isBlockThere((ball.getRow() >> 1), (ball.getCol()) >> 1))
+          {
+            blocks.removeBlock((ball.getRow() >> 1), (ball.getCol() >> 1));
+            changeDir = 2;
+            blockState = blockHit;
+          }
+          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
+          {
+            blockState = blockHit;
+          }*/
+          break;
+        }
+        case ballUpRight:
+        {
+          if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()))
+          {
+            blocks.removeBlock((ball.getRow() >> 1), ball.getCol());
+            changeDir = 1;
+            blockState = blockHit;
+          }
+          else if( blocks.isBlockThere((ball.getRow() >> 1), (ball.getCol()) << 1))
+          {
+            blocks.removeBlock((ball.getRow() >> 1), (ball.getCol() << 1));
+            changeDir = 2;
+            blockState = blockHit;
+          }
+          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
+          {
+            blockState = blockHit;
+          }*/
+          break;
+        }
+        case ballDownLeft:
+        {
+          if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()))
+          {
+            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
+            changeDir = 1;
+            blockState = blockHit;
+          }
+          else if( blocks.isBlockThere((ball.getRow() << 1), (ball.getCol()) >> 1))
+          {
+            blocks.removeBlock((ball.getRow() << 1), (ball.getCol() >> 1));
+            changeDir = 2;
+            blockState = blockHit;
+          }
+          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
+          {
+            blockState = blockHit;
+          }*/
+          break;
+        }
+        case ballDownRight:
+        {
+          if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()))
+          {
+            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
+            changeDir = 1;
+            blockState = blockHit;
+          }
+          else if( blocks.isBlockThere((ball.getRow() << 1), (ball.getCol()) << 1))
+          {
+            blocks.removeBlock((ball.getRow() << 1), (ball.getCol() << 1));
+            changeDir = 2;
+            blockState = blockHit;
+          }
+          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
+          {
+            blockState = blockHit;
+          }*/
+          break;
+        }
       }
       break;
     }
@@ -437,7 +556,42 @@ void blockController()
     }
     case blockHit:
     {
-      blocks.removeBlock(ball.getRow(), ball.getCol());
+      switch(ballState)
+      {
+        case ballUpLeft:
+        {
+          /*if( blocks.isBlockThere((ball.getRow() >> 1), (ball.getCol()) >> 1))
+          {
+            blocks.removeBlock((ball.getRow() >> 1), (ball.getCol() >> 1));
+          }*/
+          
+          break;
+        }
+        case ballUpRight:
+        {
+          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
+          {
+            blocks.removeBlock((ball.getRow() >> 1), ball.getCol());
+          }*/
+          break;
+        }
+        case ballDownLeft:
+        {
+          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
+          {
+            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
+          }*/
+          break;
+        }
+        case ballDownRight:
+        {
+          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
+          {
+            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
+          }*/
+          break;
+        }
+      }
       break;
     }
     default:
@@ -642,11 +796,6 @@ void outputController()
   }
 }
 
-void gameController()
-{
-  
-}
-
 void loop()
 {
   if(ballTimer >= 500)
@@ -659,7 +808,7 @@ void loop()
     paddleController();
     paddleTimer = 0;
   }
-  if(blockTimer >= 100)
+  if(blockTimer >= 250)
   {
     blockController();
     blockTimer = 0;
