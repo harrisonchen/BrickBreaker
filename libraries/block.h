@@ -16,13 +16,12 @@ public:
 	Block();
 
 	int isBlockThere(int, int);
-	
+
 	void setBlock(int, int);
 	void removeBlock(int, int);
 
 private:
-	SinglyList blockRow;
-	SinglyList blockCol;
+	SinglyList blocks;
 };
 
 #endif /*_BLOCK_H_*/

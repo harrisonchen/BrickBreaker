@@ -1,13 +1,16 @@
 #include <ball.h>
 #include <paddle.h>
+#include <block.h>
 
-Ball ball = Ball(0x40, 0x10);
+Ball ball;// = Ball(0x40, 0x10);
 Paddle paddle;
+Block blocks;
 int greenRowRegister[8];
 int blueRowRegister[8];
 int colRegister[8];
 int ballTimer = 0;
 int paddleTimer = 0;
+int blockTimer = 0;
 int outputTimer = 0;
 
 #include <I2Cdev.h>
@@ -71,6 +74,22 @@ void shiftVal(int redByte, int greenByte, int blueByte, int colByte)
   digitalWrite(latchPin, HIGH);
 }
 
+void blockSetup()
+{
+  blocks.setBlock(0x02, 0x02);
+  blocks.setBlock(0x02, 0x04);
+  blocks.setBlock(0x02, 0x08);
+  blocks.setBlock(0x02, 0x10);
+  blocks.setBlock(0x02, 0x20);
+  blocks.setBlock(0x02, 0x40);
+  blocks.setBlock(0x04, 0x02);
+  blocks.setBlock(0x04, 0x04);
+  blocks.setBlock(0x04, 0x08);
+  blocks.setBlock(0x04, 0x10);
+  blocks.setBlock(0x04, 0x20);
+  blocks.setBlock(0x04, 0x40);
+}
+
 void rowRegClear()
 {
   for(int i = 0; i < 8; ++i)
@@ -88,6 +107,14 @@ void rowRegInit()
     if(ball.getCol() == colRegister[i])
     {
       blueRowRegister[i] += ball.getRow();
+    }
+    if(blocks.isBlockThere(0x02, colRegister[i]))
+    {
+      greenRowRegister[i] += 0x02;
+    }
+    if(blocks.isBlockThere(0x04, colRegister[i]))
+    {
+      greenRowRegister[i] += 0x04;
     }
     if(paddle.getLeftPaddle() == colRegister[i])
     {
@@ -161,31 +188,32 @@ void ballController()
     }
     case ballDownLeft:
     {
+      //Corner hit
       if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle())) &&
                           (ball.getCol() == 0x01) )
                           {
                             ballState = ballUpRight;
                           }
+      //Corner and edge of paddle hit
       else if( (ball.getCol() == 0x01) && (ball.hitPaddle((paddle.getPaddleRow() >> 1), (paddle.getLeftPaddle() >> 1), 
                           (paddle.getMidPaddle() >> 1), (paddle.getRightPaddle()) >> 1)) )
                           {
                             ballState = ballUpRight;
                           }
+      //Paddle hit
       else if( ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle()) )
                           {
                             ballState = ballUpLeft;
                           }
+      //Edge of paddle hit
       else if( ball.hitPaddle((paddle.getPaddleRow() >> 1), (paddle.getLeftPaddle() << 1), 
                           (paddle.getMidPaddle() << 1), (paddle.getRightPaddle()) << 1) )
                           {
                             ballState = ballUpRight;
                           }
-      /*else if(ball.getRow() == 0x80)
-      {
-        ballState = ballUpLeft;
-      }*/
+      //Wall hit
       else if(ball.getCol() == 0x01)
       {
         ballState = ballDownRight;
@@ -194,27 +222,32 @@ void ballController()
     }
     case ballDownRight:
     {
+      //Corner hit
       if( (ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle())) &&
                           (ball.getCol() == 0x80) )
                           {
                             ballState = ballUpLeft;
                           }
+      //Corner and edge of paddle hit
       if( (ball.getCol() == 0x80) && (ball.hitPaddle((paddle.getPaddleRow() >> 1), (paddle.getLeftPaddle() << 1), 
                           (paddle.getMidPaddle() << 1), (paddle.getRightPaddle()) << 1)) )
                           {
                             ballState = ballUpLeft;
                           }
+      //Paddle hit
       else if(ball.hitPaddle((paddle.getPaddleRow() >> 1), paddle.getLeftPaddle(), 
                           paddle.getMidPaddle(), paddle.getRightPaddle()) )
                           {
                             ballState = ballUpRight;
                           }
+      //Edge of paddle hit
       else if( ball.hitPaddle((paddle.getPaddleRow() >> 1), (paddle.getLeftPaddle() >> 1), 
                           (paddle.getMidPaddle() >> 1), (paddle.getRightPaddle()) >> 1) )
                           {
                             ballState = ballUpLeft;
                           }
+      //Wall hit
       else if(ball.getCol() == 0x80)
       {
         ballState = ballDownLeft;
@@ -351,6 +384,60 @@ void paddleController()
     case paddleRight:
     {
       paddle.shiftPaddleRight();
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+enum blockStates{blockInit, blockMissed, blockHit} blockState;
+
+void blockController()
+{
+  switch(blockState)
+  {
+    case blockInit:
+    {
+      blockSetup();
+      blockState = blockMissed;
+      break;
+    }
+    case blockMissed:
+    {
+      if( blocks.isBlockThere(ball.getRow(), ball.getCol()) )
+      {
+        blockState = blockHit;
+      }
+      break;
+    }
+    case blockHit:
+    {
+      blockState = blockMissed;
+      break;
+    }
+    default:
+    {
+      blockState = blockInit;
+      break;
+    }
+  }
+  
+  switch(blockState)
+  {
+    case blockInit:
+    {
+      break;
+    }
+    case blockMissed:
+    {
+      break;
+    }
+    case blockHit:
+    {
+      blocks.removeBlock(ball.getRow(), ball.getCol());
       break;
     }
     default:
@@ -572,12 +659,18 @@ void loop()
     paddleController();
     paddleTimer = 0;
   }
-  //if(outputTimer >= 1)
+  if(blockTimer >= 100)
+  {
+    blockController();
+    blockTimer = 0;
+  }
+  //if(outputTimer >= 0)
   //{
     outputController();
     outputTimer = 0;
   //}
   ++ballTimer;
   ++paddleTimer;
-  ++outputTimer;
+  ++blockTimer;
+  //++outputTimer;
 }

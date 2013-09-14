@@ -6,7 +6,7 @@ Block::Block()
 
 int Block::isBlockThere(int row, int col)
 {
-	if(blockRow.isInList(row) && blockCol.isInList(col))
+	if(blocks.isInList(row, col))
 	{
 		return 1;
 	}
@@ -18,12 +18,10 @@ int Block::isBlockThere(int row, int col)
 
 void Block::setBlock(int row, int col)
 {
-	blockRow.pushBack(row);
-	blockCol.pushBack(col);
+	blocks.pushBack(row, col);
 }
 
 void Block::removeBlock(int row, int col)
 {
-	blockRow.deleteNode(row);
-	blockCol.deleteNode(col);
+  blocks.deleteNode(row, col);
 }

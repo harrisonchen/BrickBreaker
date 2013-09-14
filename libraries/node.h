@@ -7,14 +7,16 @@ using namespace std;
 class Node
 {
 public:
-	int data;
+	int row;
+	int col;
 	Node *next;
-	Node(int d, Node *ptr = 0)
+	Node(int r, int c, Node *ptr = 0)
 	{
-		data = d;
+		row = r;
+		col = c;
 		next = ptr;
 	}
 };
-	
+
 
 #endif /*_NODE_H_*/

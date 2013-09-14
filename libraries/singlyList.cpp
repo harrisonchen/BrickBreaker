@@ -1,4 +1,3 @@
-#include "node.h"
 #include "singlyList.h"
 
 using namespace std;
@@ -31,96 +30,39 @@ int SinglyList::isEmpty()
 	}
 }
 
-void SinglyList::pushFront(int d)
-{
-	Node *temp = new Node(d, head);
-	head = temp;
-	if(tail == 0)
-	{
-		tail = head;
-	}
-}
-
-void SinglyList::pushBack(int d)
+void SinglyList::pushBack(int r, int c)
 {
 	if(tail != 0)
 	{
-		tail->next = new Node(d);
+		tail->next = new Node(r, c);
 		tail = tail->next;
 	}
 	else
 	{
-		head = tail = new Node(d);
+		head = tail = new Node(r, c);
 	}
 }
 
-int SinglyList::popFront()
+void SinglyList::deleteNode(int r, int c)
 {
 	int info;
 	if(head != 0)
 	{
-		if(head == tail)
+		if((head == tail)&&(head->row == r)&&(head->col == c))
 		{
-			info = head->data;
-			delete head;
-			head = tail = 0;
-			return info;
-		}
-		else
-		{
-			info = head->data;
-			Node *temp = head;
-			head = head->next;
-			delete temp;
-			return info;
-		}
-	}
-	//return "empty";
-}
-
-int SinglyList::popBack()
-{
-	int info;
-	if(head != 0)
-	{
-		if(head == tail)
-		{
-			info = head->data;
-			delete head;
-			head = tail = 0;
-			return info;
-		}
-		else
-		{
-			Node *temp;
-			for(temp = head; temp->next != tail; temp = temp->next);
-			info = tail->data;
-			delete tail;
-			tail = temp;
-			tail->next = 0;
-			return info;
-		}
-	}
-	//return "empty";
-}
-
-void SinglyList::deleteNode(int d)
-{
-	int info;
-	if(head != 0)
-	{
-		if((head == tail)&&(head->data == d))
-		{
-			info = head->data;
+			//info = head->data;
 			//delete head;
+		//	cout << "1)Removing: " << head->row << " " << head->col << endl;
 			head = tail = 0;
 			//return info;
 		}
-		else if(head->data == d)
+		else if((head->row == r)&&(head->col == c))
 		{
-			info = head->data;
+			//info = head->data;
 			Node *temp = head;
 			head = head->next;
+//cout << "2)Removing: " << temp->row << " " << temp->col << endl;
+
 			delete temp;
 			//return info;
 		}
@@ -128,7 +70,7 @@ void SinglyList::deleteNode(int d)
 		{
 			Node *pred, *temp;
 			for(pred = head, temp = head->next;
-				(temp != 0) && !(temp->data == d);
+				(temp != 0) && !((temp->row == r)&&(temp->col == c));
 				pred = pred->next, temp = temp->next);
 			if(temp != 0)
 			{
@@ -137,7 +79,9 @@ void SinglyList::deleteNode(int d)
 				{
 					tail = pred;
 				}
-				info = temp->data;
+//cout << "3)Removing: " << temp->row << " " << temp->col << endl;
+
+				//info = temp->data;
 				delete temp;
 				//return info;
 			}
@@ -147,30 +91,33 @@ void SinglyList::deleteNode(int d)
 	//return "empty";
 }
 
-int SinglyList::isInList(int d) const
+int SinglyList::isInList(int r, int c) const
 {
 	Node *temp;
-	for(temp = head; (temp != 0)&&(temp->data != d);temp = temp->next);
+	//for(temp = head; (temp != 0)&&(temp->row != r)&&(temp->col != c);temp = temp->next);
+	for(temp = head; (temp != 0) && !((temp->row == r)&&(temp->col == c)); temp = temp->next);	
 	return (temp != 0);
 }
 
 void SinglyList::printList()
 {
+//cout << head->row << " " << head->col << endl;
+//cout << tail->row << " " << tail->col << endl;
 	if(head == 0)
 	{
-		//cout << "Empty List" << endl;
+//		cout << "Empty List" << endl;
 	}
 	Node *temp = head;
 	if(temp != 0)
 	{
-		cout << temp->data << endl;
+	//	cout << temp->row << " " << temp->col << endl;
 	}
 	if(head != tail)
 	{
 		for(temp = head->next; temp != tail; temp = temp->next)
 		{
-			cout << temp->data << endl;
+		//	cout << temp->row << " " << temp->col << endl;
 		}
-		cout << tail->data << endl;
+	//	cout << tail->row << " " << tail->col << endl;
 	}
 }
