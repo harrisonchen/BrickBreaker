@@ -1,13 +1,13 @@
 #include "paddle.h"
 
-Paddle::Paddle():row(0x80)//, col[1](0x02), col[2](0x04), col[3](0x08)
+Paddle::Paddle():row(0x80)
 {
 	col[0] = 0x02;
 	col[1] = 0x04;
 	col[2] = 0x08;
 }
 
-Paddle::Paddle(int r, int c1, int c2, int c3):row(r)//, col[1](c1), col[2](c2), col[3](c3)
+Paddle::Paddle(int r, int c1, int c2, int c3):row(r)
 {
 	col[0] = c1;
 	col[1] = c2;

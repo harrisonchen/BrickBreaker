@@ -2,7 +2,7 @@
 #include <paddle.h>
 #include <block.h>
 
-Ball ball;// = Ball(0x40, 0x10);
+Ball ball;
 Paddle paddle;
 Block blocks;
 int greenRowRegister[8];
@@ -463,10 +463,6 @@ void blockController()
             changeDir = 2;
             blockState = blockHit;
           }
-          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
-          {
-            blockState = blockHit;
-          }*/
           break;
         }
         case ballUpRight:
@@ -483,10 +479,6 @@ void blockController()
             changeDir = 2;
             blockState = blockHit;
           }
-          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
-          {
-            blockState = blockHit;
-          }*/
           break;
         }
         case ballDownLeft:
@@ -503,10 +495,6 @@ void blockController()
             changeDir = 2;
             blockState = blockHit;
           }
-          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
-          {
-            blockState = blockHit;
-          }*/
           break;
         }
         case ballDownRight:
@@ -523,10 +511,6 @@ void blockController()
             changeDir = 2;
             blockState = blockHit;
           }
-          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
-          {
-            blockState = blockHit;
-          }*/
           break;
         }
       }
@@ -559,36 +543,19 @@ void blockController()
       switch(ballState)
       {
         case ballUpLeft:
-        {
-          /*if( blocks.isBlockThere((ball.getRow() >> 1), (ball.getCol()) >> 1))
-          {
-            blocks.removeBlock((ball.getRow() >> 1), (ball.getCol() >> 1));
-          }*/
-          
+        {  
           break;
         }
         case ballUpRight:
         {
-          /*if( blocks.isBlockThere((ball.getRow() >> 1), ball.getCol()) )
-          {
-            blocks.removeBlock((ball.getRow() >> 1), ball.getCol());
-          }*/
           break;
         }
         case ballDownLeft:
         {
-          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
-          {
-            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
-          }*/
           break;
         }
         case ballDownRight:
         {
-          /*if( blocks.isBlockThere((ball.getRow() << 1), ball.getCol()) )
-          {
-            blocks.removeBlock((ball.getRow() << 1), ball.getCol());
-          }*/
           break;
         }
       }
@@ -813,13 +780,9 @@ void loop()
     blockController();
     blockTimer = 0;
   }
-  //if(outputTimer >= 0)
-  //{
-    outputController();
-    outputTimer = 0;
-  //}
+  outputController();
+  outputTimer = 0;
   ++ballTimer;
   ++paddleTimer;
   ++blockTimer;
-  //++outputTimer;
 }
