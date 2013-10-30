@@ -1,6 +1,12 @@
 #include <ball.h>
 #include <paddle.h>
 #include <block.h>
+#include <I2Cdev.h>
+#include <MPU6050.h>
+
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    #include <Wire.h>
+#endif
 
 Ball ball;
 Paddle paddle;
@@ -15,13 +21,6 @@ int outputTimer = 0;
 int changeDir = 0;
 int blockRow1 = 0x04;
 int blockRow2 = 0x08;
-
-#include <I2Cdev.h>
-#include <MPU6050.h>
-
-#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
-    #include <Wire.h>
-#endif
 
 MPU6050 accelgyro;
 
@@ -89,6 +88,7 @@ void blockSetup()
   blocks.setBlock(blockRow2, 0x20);
 }
 
+//Clears Row Registers(clears array positions)
 void rowRegClear()
 {
   for(int i = 0; i < 8; ++i)
@@ -98,6 +98,7 @@ void rowRegClear()
   }
 }
 
+//Initialize Row Registers with all game positions
 void rowRegInit()
 {
   rowRegClear();
@@ -130,6 +131,7 @@ void rowRegInit()
   }
 }
 
+//Initialize Column Values
 void colRegInit()
 {
   colRegister[0] = 0x01;
@@ -142,8 +144,10 @@ void colRegInit()
   colRegister[7] = 0x80;
 }
 
+//Ball States
 enum ballStates{ballInit, ballUpLeft, ballUpRight, ballDownLeft, ballDownRight} ballState;
 
+//Ball Controllers
 void ballController()
 {
   switch(ballState)
@@ -207,7 +211,7 @@ void ballController()
     }
     case ballDownLeft:
     {
-      //Block hhit
+      //Block hit
       if(changeDir == 1)
       {
         ballState = ballUpLeft;
@@ -338,8 +342,10 @@ void ballController()
   }
 }
 
+//Paddle States
 enum paddleStates{paddleInit, paddleStay, paddleLeft, paddleRight} paddleState;
 
+//Paddle Controller
 void paddleController()
 {
   accelgyro.getAcceleration(&ax, &ay, &az);
@@ -433,8 +439,10 @@ void paddleController()
   }
 }
 
+//Block States
 enum blockStates{blockInit, blockMissed, blockHit} blockState;
 
+//Block Controller
 void blockController()
 {
   switch(blockState)
@@ -568,9 +576,11 @@ void blockController()
   }
 }
 
+//Output States
 enum outputStates{outputInit, col0, wait0, col1, wait1, col2, wait2, col3, wait3,
                     col4, wait4, col5, wait5, col6, wait6, col7, wait7} outputState;
 
+//Output Controller
 void outputController()
 {
   rowRegInit();
